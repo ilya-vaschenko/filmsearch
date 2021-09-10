@@ -31,6 +31,8 @@ class MainFragment : Fragment() {
     private var _binding: MainFragmentBinding? = null
     private val binding get() = _binding!!
 
+    private var isDataSetRus: Boolean = true
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -47,30 +49,59 @@ class MainFragment : Fragment() {
 
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
 
-        button.setOnClickListener {
-            viewModel.liveData.observe(viewLifecycleOwner,
-                { state ->
-                    renderData(state)
-                })
-            viewModel.getFilmFromLocalSource()
+        filmAdapter.listener =
+            FilmAdapter.OnItemViewOnClickListener { film ->
+                val manager = activity?.supportFragmentManager
+                if(manager != null){
+                    val bundle = Bundle()
+                    bundle.putParcelable(DetailFragment.FILM_EXTRA, film)
+                    manager.beginTransaction()
+                        .replace(R.id.container, DetailFragment.newInstance(bundle))
+                        .addToBackStack("")
+                        .commit()
+                }
+            }
+
+        binding.buttonLang.setOnClickListener {
+
+            changeFilmDataSet()
         }
+
+        viewModel.getLiveData().observe(viewLifecycleOwner,
+            { state ->
+                renderData(state)
+            })
+        viewModel.getFilmFromLocalSourceRus()
+
     }
 
+    private fun changeFilmDataSet() {
+        if (isDataSetRus) {
+            viewModel.getFilmFromLocalSourceFilm()
+            binding.buttonLang.setImageResource(R.drawable.eu)
+        } else {
+            viewModel.getFilmFromLocalSourceRus()
+            binding.buttonLang.setImageResource(R.drawable.rus)
+        }
+        isDataSetRus = !isDataSetRus
+    }
+
+
     private fun renderData(state: AppState) {
-        val repository: Repository = RepositoryImpl()
+        //  val repository: Repository = RepositoryImpl()
         when (state) {
             is AppState.Loading -> binding.loadingLayout.visibility = View.VISIBLE
 
             is AppState.Success -> {
                 binding.loadingLayout.visibility = View.GONE
 
-                filmAdapter.setFilmList(repository.getFilmFromLocalStorage())
+                filmAdapter.setFilmList(state.filmsList)
                 filmAdapter.let {
                     val layoutManager = LinearLayoutManager(view?.context)
-                    recycler_view_lines.layoutManager =
+                    mainFragmentRecyclerView.layoutManager =
                         layoutManager
-                    recycler_view_lines.adapter = it
-                    recycler_view_lines.addItemDecoration(
+                    mainFragmentRecyclerView.adapter = it
+                    mainFragmentRecyclerView.addItemDecoration(
                         DividerItemDecoration(
                             view?.context,
                             DividerItemDecoration.VERTICAL
@@ -83,7 +114,7 @@ class MainFragment : Fragment() {
                 binding.loadingLayout.visibility = View.GONE
                 Snackbar
                     .make(binding.mainView, "ERROR", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Reload") { viewModel.getFilmFromLocalSource() }
+                    .setAction("Reload") { viewModel.getFilmFromLocalSourceRus() }
                     .show()
             }
         }
