@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.item_film.view.*
 
 class FilmAdapter : RecyclerView.Adapter<FilmAdapter.ViewHolder>() {
 
-    var filmData: List<Film> = listOf()
+    private var filmData: List<Film> = listOf()
 
     fun setFilm(data: List<Film>) {
         filmData = data
@@ -32,13 +32,14 @@ class FilmAdapter : RecyclerView.Adapter<FilmAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(film: Film) {
-
-            itemView.title.text = film.name
-            itemView.genre.text = film.genre
-            itemView.date.text = film.date.toString()
-            itemView.imageView.setImageResource(film.imageIndex)
-            itemView.setOnClickListener {
-                listener?.onItemClick(film)
+            itemView.apply {
+                title.text = film.name
+                genre.text = film.genre
+                date.text = film.date.toString()
+                imageView.setImageResource(film.imageIndex)
+                setOnClickListener {
+                    listener?.onItemClick(film)
+                }
             }
         }
     }
@@ -51,6 +52,4 @@ class FilmAdapter : RecyclerView.Adapter<FilmAdapter.ViewHolder>() {
     fun interface OnItemViewOnClickListener{
         fun onItemClick (film: Film)
     }
-
 }
-

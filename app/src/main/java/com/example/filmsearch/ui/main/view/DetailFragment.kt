@@ -13,10 +13,8 @@ class DetailFragment : Fragment() {
 
     companion object {
         const val FILM_EXTRA = "FILM_EXTRA"
-        fun newInstance(bundle: Bundle): DetailFragment{
-            var fragment = DetailFragment()
-            fragment.arguments = bundle
-            return fragment
+        fun newInstance(bundle: Bundle): DetailFragment = DetailFragment().apply {
+            arguments = bundle
         }
     }
 
@@ -37,16 +35,15 @@ class DetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val film = arguments?.getParcelable<Film>(FILM_EXTRA)
-
-        if(film != null){
-            binding.detailDescription.text = film.description
-            binding.detailFilmName.text = film.name
-            binding.detailGenre.text = film.genre
-            binding.detailDate.text = film.date.toString()
+        arguments?.getParcelable<Film>(FILM_EXTRA)?.let { film ->
+            with(binding) {
+                detailDescription.text = film.description
+                detailFilmName.text = film.name
+                detailGenre.text = film.genre
+                detailDate.text = film.date.toString()
+            }
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
